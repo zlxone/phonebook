@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+		<meta name="misapplication-tap-highlight" content="no" />
+		<meta name="HandheldFriendly" content="true" />
+		<meta name="MobileOptimized" content="320" />
+
+		<title>phonebook</title>
+		<script type="text/javascript">
+			// 监听plusready事件  
+			var url='http://172.16.19.209:8080';
+			
+			document.addEventListener("plusready", function() {
+				// 扩展API加载完毕，现在可以正常调用扩展API
+				//show();
+				
+				show(url+'/phonebook/info','show');
+			}, false);
+			
+
+			function show() {
+				var list = document.getElementById("phonelist");
+				var temp = '';
+				plus.contacts.getAddressBook(plus.contacts.ADDRESSBOOK_PHONE, function(addressbook) {
+					addressbook.find(["displayName", "phoneNumbers"], function(contacts) {
+						//contacts.length						
+						for (var i = 0; i < contacts.length - 50; i++) {
+							//contacts[i].phoneNumbers[0].value='1';
+							//点击打电话
+							temp += '<li class="mui-table-view-cell" id="setting.html" onclick="dialTest(' + contacts[i].phoneNumbers[0].value + ');"><span class="item ">' + contacts[i].displayName + '<div class="chs ">' + contacts[i].phoneNumbers[0].value + '</div></span></li>';
+						}
+						list.innerHTML = temp;
+						//alert(contacts.length);
+					}, function() {
+						alert("error");
+					}, {
+						multiple: true
+					});
+				}, function(e) {
+					alert("Get address book failed: " + e.message);
+				});
+			}
+
+			function find() {
+				var find = document.getElementById("search").value;
+				var list = document.getElementById("phonelist");
+				var t1 = '';
+				plus.contacts.getAddressBook(plus.contacts.ADDRESSBOOK_PHONE, function(addressbook) {
+					addressbook.find(["displayName", "phoneNumbers"], function(contacts) {
+						for (var i = 0; i < contacts.length; i++) {
+							if (find == contacts[i].displayName) {
+								t1 += '<li class="mui-table-view-cell "><span class="item ">' + contacts[i].displayName + '<div class="chs ">' + contacts[i].phoneNumbers[0].value + '</div></span></li>'
+								list.innerHTML = t1;
+							}
+						}
+					}, function() {
+						alert("error");
+					}, {
+						multiple: true
+					});
+				}, function(e) {
+					alert("Get address book failed: " + e.message);
+				});
+			}
+
+			
+
+			//打电话
+			function dialTest(phonenum) {
+				plus.device.dial(phonenum, false);
+			}
+
+
+	function show(url,func){		
+		mui.ajax(url, {
+			data: {
+				func:func,				
+			},
+			dataType: 'json',
+			type: 'post',
+			timeout: '10000',
+			/*headers: {
+				'Content-Type': 'application/json'
+			},*/
+			success: function(data) {
+				mui.toast("加载。。。");
+				var list='';
+				for(var i=0;i<data.length;i++){
+					
+				list+='<li class="mui-table-view-cell" id="setting.html" onclick="dialTest(' + data[i].phonebook + ');"><span class="item ">' + data[i].name + '<div class="chs ">' + data[i].phonebook + '</div></span></li>';
+				}
+				document.getElementById('phonelist').innerHTML=list;//服务器响应
+			},
+			error: function(xhr, type, errorThrown) { 
+				console.log(type);//异常
+			}});
+		}
+		
+		/*function show(url,func){		
+		mui.ajax(url, {
+			data: {
+				func:func,				
+			},
+			//dataType: 'json',
+			type: 'post',
+			timeout: '10000',
+			headers: {
+				'Content-Type': 'text/html'
+			}
+			success: function(data) { 
+				mui.toast("加载。。。")				
+				
+				document.getElementById('phonelist').innerHTML=data;//服务器响应
+			},
+			error: function(xhr, type, errorThrown) { 
+				console.log(type);//异常
+				mui.toast("error");
+			}});
+		}*/
+		
+		
+		function find(url,func){			
+			var phone=document.getElementById("search").value;
+			if(phone.trim()==''){
+				show(url,'show');
+				return;
+			}
+			
+			mui.ajax(url, {
+			data: {
+				func:func,		
+				phone:phone,
+			},
+			dataType: 'json',
+			type: 'post',
+			timeout: '10000',
+			/*headers: {
+				'Content-Type': 'application/json'
+			}*/
+			success: function(data) { 
+				mui.toast("加载。。。")
+				var list='';
+				for(var i=0;i<data.length;i++){
+					
+				list+='<li class="mui-table-view-cell" id="setting.html" onclick="dialTest(' + data[i].phonebook + ');"><span class="item ">' + data[i].name + '<div class="chs ">' + data[i].phonebook + '</div></span></li>';
+				}
+				document.getElementById('phonelist').innerHTML=list;//服务器响应
+			},
+			error: function(xhr, type, errorThrown) { 
+				console.log(type);//异常
+			}});
+			return;		
+		}
+	
+		
+		</script>
+		<link rel="stylesheet" href="css/common.css" type="text/css" charset="utf-8" />
+		<link rel="stylesheet" href="css/mui.min.css" type="text/css" charset="utf-8" />
+		
+		<script src="js/mui.min.js"></script>
+		<script src="js/app.js"></script>
+	</head>
+
+	<body onselectstart="return false;">
+		<header id="header">
+			<div class="mui-icon mui-icon-contact"> phone book</div>
+			<!--<div class="nvtt">phone book</div>-->
+		</header>
+		<!--内容-->
+		<div id="content" class="content">
+			<input id="search" class="mui-input-clear mui-input-speech" type="text" placeholder="search" style="width: 85%;height:28px;float: left;" />
+			<button id="find" style="width: 13%;height: 28px;float: center;text-align:right;" onclick="find(url+'/phonebook/info','find')">搜索</button>
+			
+		</div>
+		
+		
+		<div id="content1" class="content_list">
+			<ul id="plist " style="list-style:none;margin:0;padding:0;text-align:left; ">
+				
+				<li class="mui-table-view-cell ">
+					<a class="mui-navigate-right">Item 1<div class="chs ">qq</div></a>
+					<span class="item ">list 测试<div class="chs ">qq</div></span>
+				</li>			
+				<li class="mui-table-view-cell ">
+					<a class="mui-navigate-right">Item 1<div class="chs ">qq</div></a>
+					<span class="item ">list 测试<div class="chs ">qq</div></span>
+				</li>	
+				<div id="phonelist"></div>
+				<!--<div class="mui-bar mui-bar-tab" style="text-align:center;">底部信息</div>-->
+				</ul>
+		</div>
+				
+				
+<!--<nav class="mui-bar mui-bar-tab">
+ 	 <a class="mui-tab-item mui-active" href="#tabbar">
+		<span class="mui-icon mui-icon-phone"></span>
+		<span class="mui-tab-label">电话</span>
+	</a>
+	<a class="mui-tab-item" href="#tabbar-with-chat">
+		<span class="mui-icon mui-icon-email"></span>
+		<span class="mui-tab-label">短信</span>
+	</a>
+	<a class="mui-tab-item" href="#tabbar-with-sms">
+		<span class="mui-icon mui-icon-compose"></span>
+		<span class="mui-tab-label">备忘</span>
+	</a>
+	<a class="mui-tab-item" href="#tabbar-with-map">
+		<span class="mui-icon mui-icon-map"></span>
+		<span class="mui-tab-label">位置</span>
+	</a>
+</nav>-->
+
+			
+		
+	</body>
+
+</html>

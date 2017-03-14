@@ -1,0 +1,11 @@
+{
+	"show.html": {
+		"resources": [
+			"js/app.js",
+			"js/mui.min.js",
+			"css/common.css",
+			"fonts/mui.ttf",
+			"css/mui.min.css"
+		]
+	}
+}
